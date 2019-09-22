@@ -17,6 +17,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using WebApiSecurity.Context;
 using WebApiSecurity.Models;
+using WebApiSecurity.Services;
 
 namespace WebApiSecurity
 {
@@ -32,7 +33,15 @@ namespace WebApiSecurity
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Services for hash
+            services.AddScoped<HashService>();
+            //For encriptation
+            services.AddDataProtection();
+
+            //soving the regulation Cors
             services.AddCors();
+
+            //
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("defaultConnection")));
 
 
@@ -73,6 +82,13 @@ namespace WebApiSecurity
 
             app.UseHttpsRedirection();
             app.UseAuthentication();
+            //there is a error if you put a slash at the end of the string
+            //Here you can use all methods(GET, POST, PUT)
+            //app.UseCors(builder => builder.WithOrigins("https://www.apirequest.io"));
+            // * means all kind of headers
+            //app.UseCors(builder => builder.WithOrigins("https://www.apirequest.io").WithMethods("GET","POST").WithHeaders("*"));
+            //allow any header
+            app.UseCors(builder => builder.WithOrigins("https://www.apirequest.io").WithMethods("GET", "POST").AllowAnyHeader());
             app.UseMvc();
         }
     }
